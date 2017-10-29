@@ -1,0 +1,45 @@
+<html> 
+<head>
+    <title>Face Detective</title>    
+    <script src="extract_frames.js"></script>
+    
+
+</head>
+<body> 
+      
+<video width="400" controls>
+  <source src="./videos/test2.mp4" type="video/mp4">
+  Your browser does not support HTML5 video.
+</video>
+
+<p>Video's image frames for facial recognition:</p>
+<ol id="olFrames"></ol>
+
+<script type="text/JavaScript">
+
+showImageAt(0);
+
+var httpPost = new XMLHttpRequest(),
+        path = "http://localhost:3000/uploadImage/",
+        //data = data = JSON.stringify({image: base64});
+        data = "hello";
+    httpPost.onreadystatechange = function(err) {
+            if (httpPost.readyState == 4 && httpPost.status == 200){
+                console.log(httpPost.responseText);
+            } else {
+                console.log(err);
+            }
+        };
+    // Set the content type of the request to json since that's what's being sent
+    
+    httpPost.open("POST", path, true);
+    httpPost.setRequestHeader('Content-Type', 'application/json');
+    httpPost.send(data);
+
+    
+</script>
+
+<p>
+
+</body> 
+</html>
