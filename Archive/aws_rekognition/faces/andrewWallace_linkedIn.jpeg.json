@@ -2,14 +2,14 @@
   "FaceRecords": [
     {
       "Face": {
-        "FaceId": "190c62cb-77e2-5d37-b4d0-967e68c05ff9",
+        "FaceId": "8438320d-a08f-5cf2-88de-d1b03068d6ca",
         "BoundingBox": {
           "Width": 0.4096153974533081,
           "Height": 0.4096153974533081,
           "Left": 0.29423075914382935,
           "Top": 0.20000000298023224
         },
-        "ImageId": "ad09b716-4ab6-59d7-826c-82f2442a31ae",
+        "ImageId": "7a9a928d-2d94-59a3-b5d6-87149a1efd2d",
         "ExternalImageId": "andrewWallace_linkedIn",
         "Confidence": 99.985107421875
       },

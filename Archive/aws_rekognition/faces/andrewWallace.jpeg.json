@@ -2,14 +2,14 @@
   "FaceRecords": [
     {
       "Face": {
-        "FaceId": "82524406-3408-50cd-8866-2bb5c01e9691",
+        "FaceId": "6fef9d98-e6a6-56f7-bd1c-63e0ba6d4b57",
         "BoundingBox": {
           "Width": 0.692307710647583,
           "Height": 0.692307710647583,
           "Left": 0.13076923787593842,
           "Top": 0.08846154063940048
         },
-        "ImageId": "cdc8d179-9d2b-56ec-ac6f-d26b117ed7f5",
+        "ImageId": "c5bc44ed-cc0e-5782-b561-468d2e9325f7",
         "ExternalImageId": "andrewWallace",
         "Confidence": 99.99872589111328
       },

@@ -16,9 +16,7 @@
 
 // Load the SDK and UUID
 var config = require('./config')
-
 var AWS = require('aws-sdk');
-
 var uuid = require('node-uuid');
 var fs = require('fs-extra');
 var path = require('path');
@@ -44,7 +42,7 @@ function createCollection() {
 // Reads from a sub folder named 'faces'
 function indexFaces() {
 	var klawSync = require('klaw-sync')
-	var paths = klawSync('./faces', { nodir: true, ignore: [ "*.json" ] });
+	var paths = klawSync('./Suspect', { nodir: true, ignore: [ "*.json" ] });
 
 	paths.forEach((file) => {
 		console.log(file.path);
@@ -71,6 +69,19 @@ function indexFaces() {
 		});
 	});
 }
+
+function deleteCollection() {
+	// Index a dir of faces
+	rekognition.deleteCollection( { "CollectionId": config.collectionName }, function(err, data) {
+	  if (err) {
+		console.log(err, err.stack); // an error occurred
+	  } else {
+        console.log(data);           // successful response
+        console.log("Collection Deleted");           // successful response
+	  }
+	});
+}
+
 
 // Once you've created your collection you can run this to test it out.
 function FaceSearchTest(imagePath)
@@ -116,5 +127,6 @@ function DetectLabelsTest(imagePath)
 	});
 }
 
+//deleteCollection();
 createCollection();
 indexFaces();

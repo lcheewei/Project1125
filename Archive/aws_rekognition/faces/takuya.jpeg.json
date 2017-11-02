@@ -2,14 +2,14 @@
   "FaceRecords": [
     {
       "Face": {
-        "FaceId": "349ecb33-8b86-510e-9f5e-91cd8b5dd7b1",
+        "FaceId": "875a2ead-abef-5c4a-8401-10a24da96bec",
         "BoundingBox": {
           "Width": 0.6730769276618958,
           "Height": 0.6730769276618958,
           "Left": 0.16923077404499054,
           "Top": 0.13461539149284363
         },
-        "ImageId": "6ce75a8b-5e12-5d34-966a-5f5f147cd58e",
+        "ImageId": "0479011e-c910-5e63-a239-8b62ef971e48",
         "ExternalImageId": "takuya",
         "Confidence": 99.98641967773438
       },

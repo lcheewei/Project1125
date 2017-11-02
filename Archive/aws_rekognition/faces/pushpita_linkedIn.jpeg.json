@@ -2,14 +2,14 @@
   "FaceRecords": [
     {
       "Face": {
-        "FaceId": "b0072648-53a6-55f8-af7f-4b259b67530b",
+        "FaceId": "049101d6-91d3-5c80-ae7c-040a2f515a68",
         "BoundingBox": {
           "Width": 0.14380279183387756,
           "Height": 0.14380279183387756,
           "Left": 0.38347408175468445,
           "Top": 0.3857566714286804
         },
-        "ImageId": "eb5c34da-d187-5777-9230-ed9d1f163f0e",
+        "ImageId": "2d800278-a967-58a2-b3a8-dd150fcd1eca",
         "ExternalImageId": "pushpita_linkedIn",
         "Confidence": 99.9993896484375
       },

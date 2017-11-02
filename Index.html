@@ -1,67 +1,121 @@
 ﻿<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>Upload images to server using Node JS</title>
-
+    <title>The Face Detective</title>
     <script src="Scripts/jquery-3.1.1.min.js"></script>
     <script src="Scripts/jquery.form.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            var options = {
-                beforeSubmit: showRequest,  // pre-submit callback
-                success: showResponse  // post-submit callback
-            };
-            // bind to the form's submit event
-            $('#frmUploader').submit(function () {
-                $(this).ajaxSubmit(options);
-                // always return false to prevent standard browser submit and page navigation
-                return false;
-            });
-        });
-        // pre-submit callback
-        function showRequest(formData, jqForm, options) {
-            alert('Uploading is starting.');
-            return true;
-        }
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
-        // post-submit callback
-        function showResponse(responseText, statusText, xhr, $form) {
-            alert('status: ' + statusText + '\n\nresponseText: \n' + responseText );
-        }
-    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font: 13px Helvetica, Arial; }
+        form button { width: 9%; background: #666699; border: none; padding: 10px; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #topleft {position: fixed;top: 0%; height: 10%; width: 100%; background-color: #66b3ff; overflow-y: scroll}
+        #topright {position: fixed; top: 0%; height: 10%; margin-left: 65%; background-color: #66b3ff;overflow-y: scroll }
+        #leftCol {position: fixed; margin-top: 6%; width: 65%; height:100%; background: white; overflow-y: scroll}
+        #rightCol {position: fixed; margin-left: 65%; margin-top: 6%; height:100%; background-color: white; overflow-y: scroll}
+    </style>
 
 </head>
 <body>
-    <form id="frmUploader" enctype="multipart/form-data" action="api/Upload/" method="post">
-        <input type="file" name="imgUploader" multiple />
-        <input type="submit" name="submit" id="btnSubmit" value="Upload" />
-    </form>
-
     
-    <ul id="messages"></ul>
-    <form id = "messaging" action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+    <div id="topleft">
+        <p><h2>Upload Video: </h2></p>
+        <form id="frmUploader" enctype="multipart/form-data" action="api/Upload/" method="post" >
+            <input type="file" name="file[]" class="file_multi_video" accept="video/*" multiple />
+            <button><font color = "white"><b> Upload</font></b></button>
+            
+        </form>
+    </div>
 
-    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
-      $(function () {
-        var socket = io();
-        $('#messaging').submit(function(){
-          socket.emit('chat message', $('#m').val());
-          $('#m').val('');
-          return false;
-        });
-        socket.on('chat message', function(msg){
-          $('#messages').append($('<li>').text(msg));
-          window.scrollTo(0, document.body.scrollHeight);
-        });
-      });
+    <div id="topright">
+        <p><h2>Faces of interest: </h2></p>
+        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face1.png" width = "50" height = "50" alt = "face1" >
+        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face2.png" style="width:50px;height:50px;" alt = "face2" >
+        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face3.png" style="width:50px;height:50px;" alt = "face3" >
+        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face4.png" style="width:50px;height:50px;" alt = "face3" >
+        
+            
+    </div>
 
-    </script>
+    <div id="rightCol">
+        <p><h2>Progress: </h2></p>
+        <p id="progress"></p>
+        <p>&nbsp;</p>
+        <p>&nbsp;</p>
 
+        <p><h2>Facial Recognition Results: </h2></p>
+        <ul id="messages"></ul>
+        <ul id="matches"></ul>
+
+    </div>
+
+    <div id="leftCol">
+        <h2>Videos Uploaded for Analysis</h2>
+
+        <video width="800" height="600"controls>
+          <source src="" id="video_here">
+            Your browser does not support HTML5 video.
+        </video>
+
+    </div>
 </body>
 </html>
+
+<script>
+
+    $(document).ready(function () {
+        var options = {
+            beforeSubmit: showRequest,  // pre-submit callback
+            success: showResponse  // post-submit callback
+        };
+        // bind to the form's submit event
+        $('#frmUploader').submit(function () {
+            $(this).ajaxSubmit(options);
+            // always return false to prevent standard browser submit and page navigation
+            return false;
+        });
+    });
+    // pre-submit callback
+    function showRequest(formData, jqForm, options) {
+        alert('Uploading is starting.');
+        return true;
+    }
+    // post-submit callback
+    function showResponse(responseText, statusText, xhr, $form) {
+        alert('status: ' + statusText + '\n\nresponseText: \n' + responseText );
+    }
+    
+    $(document).on("change", ".file_multi_video", function(evt) {
+            var $source = $('#video_here');
+            $source[0].src = URL.createObjectURL(this.files[0]);
+            $source.parent()[0].load();
+    });
+
+    $(function () {
+        var socket = io();
+        $('#messaging').submit(function(){
+            socket.emit('progress', $('#m').val());
+            $('#m').val('');
+            return false;
+        });
+        socket.on('progress', function(msg){
+            document.getElementById("progress").innerHTML = msg;
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        socket.on('facematch', function(msg){
+            $('#messages').append($('<li>').text(msg.SN + ". Ext Name: " +msg.ExtName));
+            $('#messages').append($('<li>').text("Confidence: " +msg.Confidence));
+            $('#messages').append($('<li>').text("Image Name: " +msg.S3_img_name));
+            var img = document.createElement('img');
+            img.src = msg.link; // img[i] refers to the current URL.
+            $('#messages').append('<li><img src="' + img.src + '" style="width:180px;height:130px;"> <img src="https://s3.amazonaws.com/lcheewei/images/equal.png" style="width:50px;height:50px;"> <img src="https://s3.amazonaws.com/lcheewei/Faces/' +msg.ExtName + '.png" style="width:100px;height:130px;"></li><p>');
+        });
+    });
+</script>

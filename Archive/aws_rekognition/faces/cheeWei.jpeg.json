@@ -2,14 +2,14 @@
   "FaceRecords": [
     {
       "Face": {
-        "FaceId": "c40505cb-746f-5aef-aefe-d52c6efbbfe6",
+        "FaceId": "24d6ee69-f69f-5f33-aee6-30e96754fd3f",
         "BoundingBox": {
           "Width": 0.5961538553237915,
           "Height": 0.5961538553237915,
           "Left": 0.19615384936332703,
           "Top": 0.20384615659713745
         },
-        "ImageId": "43195eb9-632f-5bfb-a9a5-18887e4e0369",
+        "ImageId": "d047ab42-4ca2-52af-82e4-604a0744e8b2",
         "ExternalImageId": "cheeWei",
         "Confidence": 99.99998474121094
       },

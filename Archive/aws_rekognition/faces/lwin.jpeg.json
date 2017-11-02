@@ -2,14 +2,14 @@
   "FaceRecords": [
     {
       "Face": {
-        "FaceId": "bd56f110-710d-53a2-8d16-9359486eb71c",
+        "FaceId": "31e58293-6c81-521c-83cc-116166f41076",
         "BoundingBox": {
           "Width": 0.5115384459495544,
           "Height": 0.5115384459495544,
           "Left": 0.21153846383094788,
           "Top": 0.24230769276618958
         },
-        "ImageId": "f1c971d6-bbd1-532d-9992-022b81068428",
+        "ImageId": "404cd34e-349a-5109-97de-ee5399dff584",
         "ExternalImageId": "lwin",
         "Confidence": 99.99988555908203
       },
