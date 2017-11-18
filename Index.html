@@ -8,94 +8,137 @@
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://content.jwplatform.com/libraries/2yFhCEt9.js"> </script>
 
     <style>
+        h2 {margin: 0;font-family: sans-serif;color: white}
+        h3 {margin: 0;font-family: sans-serif;color: white}
+        body { margin: 0;font-family: sans-serif;background-color: white;color: white}
+        .wrapper {background-color: #36373f;padding: 10px;width: 100%; margin: auto;height: 120px}
+        .input[type="radio"] {margin-right: 10px}
+        input{border:1px solid #ccc;padding:8px;font-size:12px}
+        .submit{width: 100px; background: #414eb3; border: none; padding: 10px; margin-top: 6px;}
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font: 13px Helvetica, Arial; }
-        form button { width: 9%; background: #666699; border: none; padding: 10px; }
+        form button { width: 110px; background: #414eb3; border: none; padding: 10px; margin-left: 10px}
+        form { display: inline; }
         #messages { list-style-type: none; margin: 0; padding: 0; }
         #messages li { padding: 5px 10px; }
-        #topleft {position: fixed;top: 0%; height: 10%; width: 100%; background-color: #66b3ff; overflow-y: scroll}
-        #topright {position: fixed; top: 0%; height: 10%; margin-left: 65%; background-color: #66b3ff;overflow-y: scroll }
-        #leftCol {position: fixed; margin-top: 6%; width: 65%; height:100%; background: white; overflow-y: scroll}
-        #rightCol {position: fixed; margin-left: 65%; margin-top: 6%; height:100%; background-color: white; overflow-y: scroll}
+        #inner_wrap {position: fixed;left: 35%;z-index: 999;}
+        #leftCol {position: absolute; left: 0%; top: 25%; width: 57%; height:100%; overflow-y: scroll}
+        #rightCol {position: absolute; left: 57%; width: 43%; top: 25%; height:100%; background-color: white; overflow-y: scroll}
+        #topleft {position: fixed; z-index: 999; float:left; margin-left: 0%; top: 0%; width: 100%; height:25%; background-color: white; background-image: url('https://s3.amazonaws.com/lcheewei2/images/bg1.jpg'); background-size: contain; overflow-y: scroll}
+        #topright {position: fixed; z-index: 999;; margin-left: 57%; top: 0%; height:25%;  overflow-y: scroll}
+        a:link {color: white; }
+        a:visited {color: yellow;}
+        a:hover { color: green; }
+        a:active {color: greenyellow;}
     </style>
-
 </head>
 <body>
-    
+
     <div id="topleft">
-        <p><h2>Upload Video: </h2></p>
-        <form id="frmUploader" enctype="multipart/form-data" action="api/Upload/" method="post" >
-            <input type="file" name="file[]" class="file_multi_video" accept="video/*" multiple />
-            <button><font color = "white"><b> Upload</font></b></button>
-            
-        </form>
+        <h2>The AI Detective</h2>
+    </div>
+
+    <div id="inner_wrap">
+            <h3>Car plate numbers of interest: </h3>
+        <div class="dynamic-form">
+            <a href="#" id="add">Add</a> | <a href="#" id="remove">Remove</a>  | <a href="#" id="reset">Reset</a>  
+            <form id='UpdateCarPlates'  action="api/UpdateCarPlates" method="post" >
+                <div class="inputs">
+                    <div><input type="text" name="carplates[]" class="field" value='JKS 742'></div>
+                </div>
+                <button id='updateCP' type='submit' style = "width: 125px"><font color = "white"><b>Update Car Plates</font></b></button>
+            </form>
+        </div>
     </div>
 
     <div id="topright">
-        <p><h2>Faces of interest: </h2></p>
-        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face1.png" width = "50" height = "50" alt = "face1" >
-        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face2.png" style="width:50px;height:50px;" alt = "face2" >
-        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face3.png" style="width:50px;height:50px;" alt = "face3" >
-        <img src = "https://s3.amazonaws.com/lcheewei/Faces/face4.png" style="width:50px;height:50px;" alt = "face3" >
-        
-            
+        <h3>Faces of interest: </h3>
+        <ul id="faceinit"></ul>
+        <p>&nbsp;</p>
+        <form id="AddFaces" enctype="multipart/form-data" action="api/AddFaces/" method="post" >
+            <input type="file" name="file[]" class="file_multi_video" accept="image/*" multiple />
+            <button><font color = "white" style = "width: 100px"><b> Add New Faces </font></b></button> 
+        </form>
+        <form id='DelCollection' enctype="multipart/form-data" action="api/DeleteCollection" method="post" >
+            <button id='DeleteCollection' type='submit' style = "width: 120px"><font color = "white"><b>Delete Collection</font></b></button>
+        </form>
     </div>
 
     <div id="rightCol">
-        <p><h2>Progress: </h2></p>
-        <p id="progress"></p>
+        <div class='wrapper'>
+        <p><h2>Facial Recognition Results:</h2></p>
+        <br>
+        <p><h3>Progress indicator: </h3></p>
+        <font color = #c2525><p id="progressL1">Please select video source</p></font>
+        <font color = #c2525><p id="progressL2"></p></font>
+        </div>
+        <font color = #c2525>
+            <ul id="messages"></ul>
+            <ul id="matches"></ul>
+        </font>
         <p>&nbsp;</p>
-        <p>&nbsp;</p>
-
-        <p><h2>Facial Recognition Results: </h2></p>
-        <ul id="messages"></ul>
-        <ul id="matches"></ul>
-
+        <div class = "centerbutton">
+        <form id='ClearFiles' enctype="multipart/form-data" action="api/ClearFiles" method="post" >
+            <button id='clearButton' type='submit'><font color = "white"><b>Clear Files</font></b></button>
+        </form></div>
     </div>
 
     <div id="leftCol">
-        <h2>Videos Uploaded for Analysis</h2>
-
-        <video width="800" height="600"controls>
-          <source src="" id="video_here">
+        <div class='wrapper'>
+            <p><h2>1) Upload video from local file: </h2></p>
+            <p>&nbsp;</p>
+            <form id="frmUploader" enctype="multipart/form-data" action="api/Upload/" method="post" >
+                <input type="file" name="file[]" class="file_multi_video" accept="video/*" multiple />
+                Sampling Rate (fps): <input type="text" name="SamplingRate" class="field" value='1' size = "3"> 
+                <button><font color = "white"><b> Upload</font></b></button> <br>
+                <input type="radio" name="type" value="face recognition" checked style = "margin-right: 10px; margin: 10px">Face Recognition   
+                <input type="radio" name="type" value="car plate recognition"style = "margin-right: 10px; margin: 10px" >Car Plate Recognition 
+                
+            </form>
+        </div>
+        <center>
+        <video width="600" height="450"controls>
+            <source src="" id="video_here" type="video/mp4">
             Your browser does not support HTML5 video.
-        </video>
+        </video></center>
+        <p>&nbsp;</p>
 
+        <div class='wrapper'>
+            <p><h2>2) Live streaming URL: </h2></p>
+            <p>&nbsp;</p>
+            <form id='LiveURL' enctype="multipart/form-data" action="api/Live" method="post" >
+                <div class='form-uname'>
+                    <lable id='nameLable' for='urlField'>Live stream url:</lable>
+                    <input id='urlField' type='text' name = "url" size = "55" maxlength='60' value = "http://52.55.147.199:1935/live/myStream/playlist.m3u8"></input>
+                    Sampling Rate (fps): <input type="text" name="SamplingRate" class="field" value='1' size = "3"> 
+                    <button id='subButton' type='submit'><font color = "white"><b>Play</font></b></button><br>
+                    <input type="radio" name="type" value="face recognition" checked style = "margin-right: 10px; margin: 10px"> Face Recognition   
+                    <input type="radio" name="type" value="car plate recognition" style = "margin-right: 10px; margin: 10px"> Car Plate Recognition 
+                </div>
+            </form>
+            <div>
+                    <font color = #c2525><p id='result'></p></div></font>
+            </div>
+        <p>&nbsp;</p>
+        <center><div id="liveVideo"></div>
+        <p>&nbsp;</p></center>
     </div>
 </body>
 </html>
 
 <script>
+/*eslint linebreak-style: ["error", "windows"]*/
 
-    $(document).ready(function () {
-        var options = {
-            beforeSubmit: showRequest,  // pre-submit callback
-            success: showResponse  // post-submit callback
-        };
-        // bind to the form's submit event
-        $('#frmUploader').submit(function () {
-            $(this).ajaxSubmit(options);
-            // always return false to prevent standard browser submit and page navigation
-            return false;
-        });
-    });
-    // pre-submit callback
-    function showRequest(formData, jqForm, options) {
-        alert('Uploading is starting.');
-        return true;
-    }
-    // post-submit callback
-    function showResponse(responseText, statusText, xhr, $form) {
-        alert('status: ' + statusText + '\n\nresponseText: \n' + responseText );
-    }
+$('#clearButton').click(function() {
+    $('ul').empty();
+});
+$('#DelCollection').click(function() {
+    $('ul').empty();
+});
     
-    $(document).on("change", ".file_multi_video", function(evt) {
-            var $source = $('#video_here');
-            $source[0].src = URL.createObjectURL(this.files[0]);
-            $source.parent()[0].load();
-    });
+$('#faceinit').empty();
 
     $(function () {
         var socket = io();
@@ -104,18 +147,132 @@
             $('#m').val('');
             return false;
         });
-        socket.on('progress', function(msg){
-            document.getElementById("progress").innerHTML = msg;
+        //io.emit('CarPlates', answers);
+        socket.on('progressL1', function(msg){
+            document.getElementById("progressL1").innerHTML = msg;
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+        socket.on('progressL2', function(msg){
+            document.getElementById("progressL2").innerHTML = msg;
             window.scrollTo(0, document.body.scrollHeight);
         });
 
         socket.on('facematch', function(msg){
             $('#messages').append($('<li>').text(msg.SN + ". Ext Name: " +msg.ExtName));
+            $('#messages').append($('<li>').text("Similarity: " +msg.Similarity));
             $('#messages').append($('<li>').text("Confidence: " +msg.Confidence));
-            $('#messages').append($('<li>').text("Image Name: " +msg.S3_img_name));
+            //$('#messages').append($('<li>').text("Image Name: " +msg.S3_img_name));
             var img = document.createElement('img');
             img.src = msg.link; // img[i] refers to the current URL.
-            $('#messages').append('<li><img src="' + img.src + '" style="width:180px;height:130px;"> <img src="https://s3.amazonaws.com/lcheewei/images/equal.png" style="width:50px;height:50px;"> <img src="https://s3.amazonaws.com/lcheewei/Faces/' +msg.ExtName + '.png" style="width:100px;height:130px;"></li><p>');
+            $('#messages').append('<li><img src="' + img.src + '" style="height:130px;"> <img src="https://s3.amazonaws.com/lcheewei/images/equal.png" style="width:50px;height:50px;"> <img src="https://s3.amazonaws.com/lcheewei/1125class/' +msg.ExtName + '.png" style="width:100px;height:130px;"></li><p>');
         });
+
+        socket.on('carmatch', function(msg){
+            $('#messages').append($('<li>').text(msg.SN + '. Car Plate ' + msg.target + ' detected: ' ));
+            $('#messages').append($('<li>').text(msg.words));
+            var img = document.createElement('img');
+            img.src = msg.link; // img[i] refers to the current URL.
+            $('#messages').append('<li><img src="' + img.src + '" style="height:130px;"> </li><p>');
+        });
+
+        socket.on('faceinit', function(msg){
+            var img = document.createElement('img');
+            img.src = msg; // img[i] refers to the current URL.
+            $('#faceinit').append('<img src="' + img.src + '" style="height:50px; width:50px">');
+        });
+
+        socket.on('delfaceinit', function(msg){
+            $('ul').empty();
+        });
+
     });
+
+    
+    
+$(document).ready(function(){
+    var i = $('input').size() + 1;
+    $('#add').click(function() {
+		$('<div><input type="text" class="field" name="carplates[]" value="" /></div>').fadeIn('slow').appendTo('.inputs');
+		i++;
+    });
+	
+	$('#remove').click(function() {
+    if(i > 1) {
+        $('.field:last').remove();
+        i--; 
+    }
+	});
+	
+	$('#reset').click(function() {
+        while(i > 2) {
+            $('.field:last').remove();
+            i--;
+        }
+	});
+
+	$('.submit').click(function(){
+        var answers = [];
+        $.each($('.field'), function() {
+            answers.push($(this).val()); 
+        });
+        
+        if(answers.length == 0) { 
+            answers = 'none;'; 
+        }   
+        //alert(answers);
+        //io.emit('CarPlates', answers);
+        return false;
+    });
+});
+
+
+function StreamingURL() {
+    var urlField = document.getElementById('urlField').value;
+    var result = document.getElementById('result');
+    if (urlField.length < 3) {
+        result.textContent = 'invalid url';
+        //alert('Username must contain at least 3 characters');
+    } else {
+        result.textContent = 'Playing video from: ' + urlField;
+        //alert(nameField);
+    }
+    var playerInstance = jwplayer("liveVideo");
+        playerInstance.setup({
+            file: urlField,
+    });
+}
+
+    // use an eventlistener for the event
+    var subButton = document.getElementById('subButton');
+    subButton.addEventListener('click', StreamingURL, false);      
+
+/*
+    <img src = "https://s3.amazonaws.com/lcheewei/Faces/face1.png" width = "50" height = "50" alt = "face1" >
+    <img src = "https://s3.amazonaws.com/lcheewei/Faces/face2.png" style="width:50px;height:50px;" alt = "face2" >
+    <img src = "https://s3.amazonaws.com/lcheewei/Faces/face3.png" style="width:50px;height:50px;" alt = "face3" >
+    <img src = "https://s3.amazonaws.com/lcheewei/Faces/face4.png" style="width:50px;height:50px;" alt = "face3" >
+
+    <img src = "https://s3.amazonaws.com/lcheewei/1125class/abel.png" width = "50" height = "50" alt = "abel" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/andrewMillington.png" style="width:50px;height:50px;" alt = "andrewM" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/andrewWallace.png" style="width:50px;height:50px;" alt = "andrewW" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/aramael.png" style="width:50px;height:50px;" alt = "aramel" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/cheeWei.png" style="width:50px;height:50px;" alt = "cheeWei" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/fabian.png" style="width:50px;height:50px;" alt = "fabian" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/javier.png" style="width:50px;height:50px;" alt = "javier" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/jawad.png" style="width:50px;height:50px;" alt = "jawal" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/jeff.png" style="width:50px;height:50px;" alt = "jeff" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/john.png" style="width:50px;height:50px;" alt = "john" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/jonathan.png" style="width:50px;height:50px;" alt = "jonathan" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/jose.png" style="width:50px;height:50px;" alt = "jose" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/lwin.png" style="width:50px;height:50px;" alt = "lwin" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/meng.png" style="width:50px;height:50px;" alt = "meng" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/paula.png" style="width:50px;height:50px;" alt = "paula" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/pushpita.png" style="width:50px;height:50px;" alt = "pushpita" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/rajan.png" style="width:50px;height:50px;" alt = "rajan" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/sam_02.png" style="width:50px;height:50px;" alt = "sam" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/sridhar.png" style="width:50px;height:50px;" alt = "srihdar" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/takuya.png" style="width:50px;height:50px;" alt = "takuya" >
+        <img src = "https://s3.amazonaws.com/lcheewei/1125class/tyler.png" style="width:50px;height:50px;" alt = "tyler" >
+
+*/
 </script>

@@ -1,0 +1,103 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+       {
+          "Effect": "Allow",
+          "Action": [
+             "s3:*"
+          ],
+          "Resource": [
+             "arn:aws:s3:::BUCKET_NAME/*"
+          ]
+       }
+    ]
+ }
+ <?xml version="1.0" encoding="UTF-8"?>
+ <CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+     <CORSRule>
+         <AllowedOrigin>*</AllowedOrigin>
+         <AllowedMethod>POST</AllowedMethod>
+         <AllowedMethod>GET</AllowedMethod>
+         <AllowedMethod>PUT</AllowedMethod>
+         <AllowedMethod>DELETE</AllowedMethod>
+         <AllowedMethod>HEAD</AllowedMethod>
+         <AllowedHeader>*</AllowedHeader>
+     </CORSRule>
+ </CORSConfiguration>
+
+
+ <!DOCTYPE html>
+ <html>
+   <head>
+     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.151.0.min.js"></script>
+     <script src="./app.js"></script>
+     <script>
+        function getHtml(template) {
+           return template.join('\n');
+        }
+        listAlbums();
+     </script>
+   </head>
+   <body>
+     <h1>My Photo Albums App</h1>
+     <div id="app"></div>
+   </body>
+ </html>
+
+ <script>
+ var AWS = require('aws-sdk');  
+ var albumBucketName = 'faceinit';
+var bucketRegion = 'us-east-1';
+var IdentityPoolId = 'IDENTITY_POOL_ID';
+
+AWS.config.update({
+  region: bucketRegion,
+  credentials: new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: IdentityPoolId
+  })
+});
+
+var s3 = new AWS.S3({
+  apiVersion: '2006-03-01',
+  params: {Bucket: faceinit}
+});
+
+function listAlbums() {
+  s3.listObjects({Delimiter: '/'}, function(err, data) {
+    if (err) {
+      return alert('There was an error listing your albums: ' + err.message);
+    } else {
+      var albums = data.CommonPrefixes.map(function(commonPrefix) {
+        var prefix = commonPrefix.Prefix;
+        var albumName = decodeURIComponent(prefix.replace('/', ''));
+        return getHtml([
+          '<li>',
+            '<span onclick="deleteAlbum(\'' + albumName + '\')">X</span>',
+            '<span onclick="viewAlbum(\'' + albumName + '\')">',
+              albumName,
+            '</span>',
+          '</li>'
+        ]);
+      });
+      var message = albums.length ?
+        getHtml([
+          '<p>Click on an album name to view it.</p>',
+          '<p>Click on the X to delete the album.</p>'
+        ]) :
+        '<p>You do not have any albums. Please Create album.';
+      var htmlTemplate = [
+        '<h2>Albums</h2>',
+        message,
+        '<ul>',
+          getHtml(albums),
+        '</ul>',
+        '<button onclick="createAlbum(prompt(\'Enter Album Name:\'))">',
+          'Create New Album',
+        '</button>'
+      ]
+      document.getElementById('app').innerHTML = getHtml(htmlTemplate);
+    }
+  });
+}
+
+ </script>
