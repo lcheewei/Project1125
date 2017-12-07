@@ -61,6 +61,7 @@ app.get('/', function (req, res) {
 });
 
 var upload = multer({ dest: 'uploads/' });
+// API uses Multer to handle videos uploaded from browser. Uploaded files stored in /uploades directory
 app.post('/api/Upload', upload.array('file[]', 3), function (req, res) {
     console.log('1. File received in server'); 
     console.log("Sample rate: " +req.body.SamplingRate); 
@@ -91,14 +92,14 @@ app.post('/api/Upload', upload.array('file[]', 3), function (req, res) {
             console.log (e);
         });
     }
-    //ListCollection();
 });
 
+// API to handle live videos. Uses Chokidar to look out for video snapshots saved every 30s (settings in Wowza server)
+// Alter Chokidar watch directory based on where files are saved (Wowza streaming engine settings)
 app.post('/api/Live', function (req, res) {
     console.log('1. Inside API Live'); 
     VideoSampleRate = req.body.SamplingRate;
     io.emit('progressL1', '1. Reading live video');
-    //var path = './temp/';
     res.redirect('localhost:2000/index.html');
     var currpath='';
     //var watcher = chokidar.watch('/usr/local/WowzaStreamingEngine-4.7.1/content/', {    
@@ -112,8 +113,6 @@ app.post('/api/Live', function (req, res) {
         log('File', path, 'has been added'); 
         if (path.slice (-10) != currpath.slice(-10) ) {
             if (path.slice(-3)!='tmp'){
-                //console.log ('Currpath: ' + currpath); 
-                //console.log ('Path: ' + path ); 
                 if (currpath != ''){
                     debounce (ProcessVid(currpath),500); // deal with multiple file added events that happen in quick succession (due to low level events)
                 }                                        // ensure processvid is not repeated within 500ms.
@@ -124,8 +123,8 @@ app.post('/api/Live', function (req, res) {
 
     var ProcessVid = function (path) {
         console.log ('in processvid');       
-
-        if (req.body.type == 'face recognition'){
+        if (req.body.typeB == 'face recognition'){
+            io.emit('progressL2', 'Face recognition selected');
             ExtractFrames(path)
             .then(UploadImagestoS3)
             .then(RetrieveImagesFromS3)
@@ -135,7 +134,8 @@ app.post('/api/Live', function (req, res) {
                 console.log (e);
             });
         }
-        else if (req.body.type == 'car plate recognition'){
+        else if (req.body.typeB == 'car plate recognition'){
+            io.emit('progressL2', 'Car plate recognition selected');
             ExtractFrames(path)
             .then(UploadImagestoS3)
             .then(RetrieveImagesFromS3)
@@ -148,6 +148,7 @@ app.post('/api/Live', function (req, res) {
     };
 });
 
+// API to reset results and clear files from storage
 app.post('/api/ClearFiles', function (req, res) {
     console.log('Clear Files'); 
     res.redirect('localhost:2000/index.html');
@@ -156,27 +157,16 @@ app.post('/api/ClearFiles', function (req, res) {
     ClearMedia();
 });
 
+// API to update car plates of interest
 app.post('/api/UpdateCarPlates', function (req, res) {
     carplates = req.body.carplates;
     console.log(carplates);
     res.redirect('localhost:2000/index.html');
     io.emit('progressL1', 'Car plate numbers of interest updated: '+carplates);
-
-    indexFaces()
+    //indexFaces()
 });
 
-io.on('connection', function(socket){
-    socket.on('CarPlates', function(msg){
-        console.log(msg);
-    });
-  });
-
-server.listen(2000, function(){
-    console.log('Server listening on port 2000:');
-});
-
-
-//var TargetCarPlates = [];
+// Init server-side storage for uploaded faces of interest
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'UploadedFaces/')
@@ -184,10 +174,11 @@ var storage = multer.diskStorage({
     filename: function (req, file, cb) {
         cb( null, file.originalname );
       }
-  })
-  var path = require('path')
-  var upload = multer({ storage: storage });
+})
+var path = require('path')
+var upload = multer({ storage: storage });
 
+//API to handle uploaded faces of interest
 app.post('/api/AddFaces',upload.array('file[]', 30), function (req, res) {
     console.log('1. Face images received in server'); 
     io.emit('progressL1', 'Updating Face Collection');
@@ -203,7 +194,7 @@ app.post('/api/AddFaces',upload.array('file[]', 30), function (req, res) {
 
 });
 
-
+// API to clear Face Collection
 app.post('/api/DeleteCollection', function (req, res) {
     res.redirect('localhost:2000/index.html');
     io.emit('progressL1', 'Deleting Face Collection');
@@ -211,6 +202,19 @@ app.post('/api/DeleteCollection', function (req, res) {
     deleteCollection();
 });
 
+// Init IO socket
+io.on('connection', function(socket){
+    socket.on('CarPlates', function(msg){
+        console.log(msg);
+    });
+  });
+
+  // Init server to listen to port 2000
+server.listen(2000, function(){
+    console.log('Server listening on port 2000:');
+});
+
+// Function to extract video input into picture frames using ffmpeg. Need to have ffmpeg install on computer
 var ExtractFrames = function(path) {
     return new Promise(function(resolve, reject) {
         try {
@@ -240,6 +244,7 @@ var ExtractFrames = function(path) {
     });
 };
 
+// Upload images to AWS S3 storage
 var UploadImagestoS3 = function() {
     return new Promise(function(resolve, reject) {
         console.log('3. Uploading frame images to S3 Storage ... ');
@@ -263,6 +268,7 @@ var UploadImagestoS3 = function() {
     });
 };
 
+// Retrieve imafes from S3 images 
 var RetrieveImagesFromS3 = function() {
     return new Promise(function(resolve, reject) {
         console.log('4. Retrieve images from AWS Storage'); 
@@ -297,6 +303,7 @@ var RetrieveImagesFromS3 = function() {
     });
 };
 
+// send images to AWS Rekognition for analysis
 var AnalyzeFaceImage = function(keys) {
     return new Promise(function(resolve, reject) {
         app.use(Express.static('public'));
@@ -379,6 +386,7 @@ var AnalyzeFaceImage = function(keys) {
     });
 };
 
+// Sending images to Google cloud vision for analysis
 var AnalyzeCarImage = function(keys) {
     return new Promise(function(resolve, reject) {
         var vision = require('@google-cloud/vision');
@@ -386,8 +394,6 @@ var AnalyzeCarImage = function(keys) {
             projectId: 'essential-asset-165501',
             keyFilename: 'mykey.json'
         });
-
-        //var target = 'JKS 742';
         
         console.log('5. Sending ' + keys.length + ' images to Google for Image Recognition'); 
         io.emit('progressL1', '5/6: Sending images to Google for Image Recognition ...');
@@ -463,6 +469,7 @@ var AnalyzeCarImage = function(keys) {
     });
 };
 
+// Clear files from S3 storage and local file directory
 var ClearMedia = function() {
     return new Promise(function(resolve, reject) {
         console.log ('Clearing Media');	
@@ -507,6 +514,8 @@ var ClearMedia = function() {
         }
     });
 };
+
+// delete face collection from AWS List
 var rekognition = new AWS.Rekognition({region: config.region});
 function deleteCollection() {
     // Index a dir of faces
@@ -567,6 +576,7 @@ function deleteCollection() {
         }
 }
 
+// Create Face collection for AWS Rekognition
 function createCollection() {
 	// Index a dir of faces
 	rekognition.createCollection( { "CollectionId": config.collectionName }, function(err, data) {
@@ -580,6 +590,7 @@ function createCollection() {
 	});
 }
 
+// index faces of interest. Uses KlawSync to synchronize files uploaded in server with S3
 function indexFaces() {
 	var klawSync = require('klaw-sync')
     var paths = klawSync('./UploadedFaces', { nodir: true, ignore: [ "*.json" ] });
@@ -614,6 +625,7 @@ function indexFaces() {
 	});
 }
 
+// Upload Face init info to S3 cloud storage
 var UploadFaceInittoS3 = function() {
     return new Promise(function(resolve, reject) {
         console.log('3. Uploading face init images to S3 Storage ... ');
@@ -637,6 +649,7 @@ var UploadFaceInittoS3 = function() {
     });
 };
 
+// List faces in Face collection
 var ListFaceInit = function () {
     var s3 = new AWS.S3({apiVersion: '2006-03-01'});
     var params = {
